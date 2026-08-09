@@ -3,17 +3,14 @@ import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { App } from "./App";
-import * as client from "./api/client";
+import * as authService from "./auth/authService";
 
-vi.mock("./api/client", () => ({
-  fetchMe: vi.fn(),
-  fetchAuthConfig: vi.fn(),
-  signInDev: vi.fn(),
+vi.mock("./auth/authService", () => ({
+  isGoogleSignInAvailable: vi.fn(),
+  subscribeToAuth: vi.fn(),
   signInWithGoogle: vi.fn(),
-  signOutRequest: vi.fn(),
-  fetchAssessments: vi.fn(),
-  fetchStudentAttempts: vi.fn(),
-  startAttempt: vi.fn(),
+  signInDev: vi.fn(),
+  signOutUser: vi.fn(),
 }));
 
 const USER = {
@@ -23,45 +20,18 @@ const USER = {
   picture: null,
 };
 
-const ASSESSMENTS = [
-  {
-    id: "mock-01",
-    title: "AMC 8 Mock Exam #1",
-    description: "Full-length simulation.",
-    kind: "mock",
-    examType: "amc8",
-    timeLimitMinutes: 40,
-    questionCount: 25,
-  },
-  {
-    id: "quiz-geometry",
-    title: "Geometry Quiz",
-    description: "Six questions.",
-    kind: "topic-quiz",
-    examType: "amc8",
-    timeLimitMinutes: 15,
-    questionCount: 6,
-  },
-  {
-    id: "amc10-mock-01",
-    title: "AMC 10 Mock Exam #1",
-    description: "Full-length AMC 10 simulation.",
-    kind: "mock",
-    examType: "amc10",
-    timeLimitMinutes: 75,
-    questionCount: 25,
-  },
-] as const;
+function authAs(user: typeof USER | null) {
+  vi.mocked(authService.subscribeToAuth).mockImplementation((cb) => {
+    cb(user);
+    return () => {};
+  });
+}
 
 beforeEach(() => {
-  vi.mocked(client.fetchMe).mockResolvedValue(USER);
-  vi.mocked(client.fetchAuthConfig).mockResolvedValue({
-    googleClientId: null,
-    devLoginEnabled: true,
-  });
-  vi.mocked(client.fetchAssessments).mockResolvedValue([...ASSESSMENTS]);
-  vi.mocked(client.fetchStudentAttempts).mockResolvedValue([]);
-  vi.mocked(client.signOutRequest).mockResolvedValue({ ok: true });
+  localStorage.clear();
+  vi.mocked(authService.isGoogleSignInAvailable).mockReturnValue(false);
+  vi.mocked(authService.signOutUser).mockResolvedValue(undefined);
+  authAs(USER);
 });
 
 function renderAt(path: string) {
@@ -73,17 +43,30 @@ function renderAt(path: string) {
 }
 
 describe("authentication", () => {
-  it("redirects signed-out visitors to the login page", async () => {
-    vi.mocked(client.fetchMe).mockRejectedValue(new Error("Not signed in"));
+  it("redirects signed-out visitors to the login page with the dev form", async () => {
+    authAs(null);
     renderAt("/");
     expect(await screen.findByRole("heading", { name: "Sign in" })).toBeInTheDocument();
-    expect(await screen.findByLabelText("Your name")).toBeInTheDocument();
+    expect(screen.getByLabelText("Your name")).toBeInTheDocument();
     expect(screen.getByLabelText("Email")).toBeInTheDocument();
   });
 
+  it("offers Google sign-in when Firebase is configured", async () => {
+    authAs(null);
+    vi.mocked(authService.isGoogleSignInAvailable).mockReturnValue(true);
+    vi.mocked(authService.signInWithGoogle).mockResolvedValue(USER);
+    renderAt("/login");
+
+    fireEvent.click(await screen.findByRole("button", { name: "Continue with Google" }));
+    expect(
+      await screen.findByRole("heading", { name: "Welcome, Taylor Reed" }),
+    ).toBeInTheDocument();
+    expect(authService.signInWithGoogle).toHaveBeenCalled();
+  });
+
   it("signs in through the dev form and shows the user's name and email", async () => {
-    vi.mocked(client.fetchMe).mockRejectedValue(new Error("Not signed in"));
-    vi.mocked(client.signInDev).mockResolvedValue(USER);
+    authAs(null);
+    vi.mocked(authService.signInDev).mockResolvedValue(USER);
     renderAt("/login");
 
     fireEvent.change(await screen.findByLabelText("Your name"), {
@@ -97,8 +80,7 @@ describe("authentication", () => {
     expect(
       await screen.findByRole("heading", { name: "Welcome, Taylor Reed" }),
     ).toBeInTheDocument();
-    expect(client.signInDev).toHaveBeenCalledWith("Taylor Reed", "taylor@example.com");
-    // Header shows identity from the session.
+    expect(authService.signInDev).toHaveBeenCalledWith("Taylor Reed", "taylor@example.com");
     expect(screen.getAllByText("taylor@example.com").length).toBeGreaterThanOrEqual(1);
   });
 
@@ -106,7 +88,7 @@ describe("authentication", () => {
     renderAt("/");
     fireEvent.click(await screen.findByRole("button", { name: "Sign out" }));
     expect(await screen.findByRole("heading", { name: "Sign in" })).toBeInTheDocument();
-    expect(client.signOutRequest).toHaveBeenCalled();
+    expect(authService.signOutUser).toHaveBeenCalled();
   });
 });
 
@@ -123,8 +105,8 @@ describe("post-login home", () => {
   });
 });
 
-describe("assessment hub", () => {
-  it("lists fetched assessments with start buttons enabled", async () => {
+describe("assessment hub (bundled question bank)", () => {
+  it("lists real assessments from the bundled bank with start buttons enabled", async () => {
     renderAt("/assessment");
     expect(await screen.findByText("AMC 8 Mock Exam #1")).toBeInTheDocument();
     expect(screen.getByText("Geometry Quiz")).toBeInTheDocument();

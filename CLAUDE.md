@@ -4,8 +4,9 @@ Monorepo of React webapps for math tutoring, adaptive assessment, and personaliz
 
 ## Layout
 
-- `apps/web` — student-facing app (`@mathprep/web`): Vite + React 19 + React Router + KaTeX. Playwright e2e specs live in `apps/web/e2e/`. Talks to the API via `/api` (Vite dev/preview proxy → localhost:3001).
-- `apps/api` — assessment API (`@mathprep/api`): Hono + built-in `node:sqlite`, port 3001. Question bank + assessments seed on first boot (`src/seed/`); grading is server-side only — answers/explanations are never sent to the client during a test. `DATABASE_PATH=:memory:` gives a fresh seeded db (used by e2e); default is `apps/api/data/dev.db` (gitignored).
+- `apps/web` — student-facing app (`@mathprep/web`): Vite + React 19 + React Router + KaTeX. **Fully static for the PMF phase** — the question bank is bundled (`@mathprep/question-bank`), grading runs client-side, attempts live in localStorage, and sign-in is Firebase Google auth (user records in Firestore `users/{uid}`; dev name+email fallback while `src/config/firebase.ts` is unfilled). Deploys to Cloudflare Pages on every push — see `docs/deploy-cloudflare.md` and the `validate-cf-deploy` skill. Playwright e2e specs live in `apps/web/e2e/` and run against the built bundle (no API server).
+- `apps/api` — assessment API (`@mathprep/api`): Hono + built-in `node:sqlite`, port 3001. **On hold** (not deployed) but kept green: seeds from `@mathprep/question-bank` on first boot; `DATABASE_PATH=:memory:` gives a fresh seeded db; default is `apps/api/data/dev.db` (gitignored).
+- `packages/question-bank` — the question/assessment content (`@mathprep/question-bank`): `QUESTION_BANK`, `PRACTICE_SETS` (`src/sets/{amc8,amc10,amc12}/`), `ASSESSMENTS`, `ALL_QUESTIONS`, with integrity tests in `src/bank.test.ts`. Author via the `author-questions` skill.
 - `packages/core` — shared domain (`@mathprep/core`): question/assessment types, zod schemas, topic taxonomy, AMC 8 scoring rules.
 - `packages/ui` — shared React components (`@mathprep/ui`).
 - `packages/eslint-config`, `packages/typescript-config` — shared tooling presets consumed by every workspace.
@@ -45,4 +46,4 @@ Add dependencies with `pnpm --filter <pkg> add [-D] <dep>` — never hand-edit `
 3. New components have unit tests; new user flows have an e2e spec.
 4. User-visible changes get a changeset.
 
-Project skills in `.claude/skills/` cover the repeatable workflows: `verify-changes`, `new-app`, `new-package`, `e2e-debug`, `author-questions`.
+Project skills in `.claude/skills/` cover the repeatable workflows: `verify-changes`, `new-app`, `new-package`, `e2e-debug`, `author-questions`, `validate-cf-deploy`.

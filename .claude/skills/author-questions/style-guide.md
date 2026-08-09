@@ -1,7 +1,7 @@
 # AMC 8 Question Style Guide
 
 _Distilled from the real 2022-2025 AMC 8 exams (studied via the AoPS wiki archive)._
-_Used to author the seed bank in `apps/api/src/seed/questions.ts`. Real AMC problems are MAA-copyrighted — this guide captures the **style**; all bank content must be original._
+_Used to author the seed bank in `packages/question-bank/src/questions.ts`. Real AMC problems are MAA-copyrighted — this guide captures the **style**; all bank content must be original._
 
 ## AMC 8 House Style — Hard Rules for Question Authors
 

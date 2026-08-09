@@ -160,15 +160,11 @@ header nav {
   font-weight: 400;
 }
 
-.login-divider {
-  text-align: center;
-  color: #5a5a72;
-  margin: 1rem 0 0.75rem;
-}
-
-.google-button-slot {
-  margin: 1rem 0 0.25rem;
-  min-height: 2.75rem;
+.google-signin {
+  width: 100%;
+  margin: 0.5rem 0;
+  padding: 0.7rem 1rem;
+  font-weight: 600;
 }
 
 /* ── Home / exam picker ─────────────────────────────────────────────── */

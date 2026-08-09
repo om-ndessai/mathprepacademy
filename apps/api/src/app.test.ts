@@ -13,7 +13,7 @@ import type {
 
 import { createApp } from "./app";
 import { openDatabase } from "./db";
-import { QUESTION_BANK } from "./seed/questions";
+import { QUESTION_BANK } from "@mathprep/question-bank";
 
 let app: Hono;
 

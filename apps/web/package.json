@@ -15,7 +15,9 @@
   },
   "dependencies": {
     "@mathprep/core": "workspace:*",
+    "@mathprep/question-bank": "workspace:*",
     "@mathprep/ui": "workspace:*",
+    "firebase": "^12.17.1",
     "katex": "^0.17.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",

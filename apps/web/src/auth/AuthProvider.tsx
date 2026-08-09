@@ -3,9 +3,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { AuthUser } from "@mathprep/core";
 
-import { fetchMe, signOutRequest } from "../api/client";
 import type { AuthContextValue } from "./authContext";
 import { AuthContext } from "./authContext";
+import { signOutUser, subscribeToAuth } from "./authService";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<Pick<AuthContextValue, "status" | "user">>({
@@ -14,21 +14,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
-    let cancelled = false;
-    fetchMe()
-      .then((user) => {
-        if (!cancelled) {
-          setState({ status: "signed-in", user });
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setState({ status: "signed-out", user: null });
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
+    return subscribeToAuth((user) => {
+      setState(user ? { status: "signed-in", user } : { status: "signed-out", user: null });
+    });
   }, []);
 
   const setUser = useCallback((user: AuthUser) => {
@@ -36,7 +24,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
-    await signOutRequest();
+    await signOutUser();
     setState({ status: "signed-out", user: null });
   }, []);
 

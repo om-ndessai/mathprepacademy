@@ -3,7 +3,9 @@ packages:
   - "packages/*"
 
 allowBuilds:
+  "@firebase/util": true
   esbuild: true
+  protobufjs: true
 
 # Single TypeScript version across the workspace. typescript-eslint supports
 # >=4.8.4 <6.1.0 — TypeScript 7 (native) is not yet supported by the lint

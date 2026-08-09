@@ -5,9 +5,9 @@ description: Add or edit AMC 8-style questions and assessments in the seed bank.
 
 # Authoring questions and assessments
 
-The question bank lives in `apps/api/src/seed/questions.ts`; assessment definitions in
-`apps/api/src/seed/assessments.ts`. Seed data is validated against the zod schemas in
-`@mathprep/core` at server boot and in `apps/api/src/seed/seed.test.ts`.
+The question bank lives in `packages/question-bank/src/questions.ts`; assessment definitions in
+`packages/question-bank/src/assessments.ts`. Seed data is validated against the zod schemas in
+`@mathprep/core` at server boot and in `packages/question-bank/src/bank.test.ts`.
 
 **Read the style guide for the target contest first** — each is distilled from real
 exams and defines stem voice, per-band reasoning-step targets, distractor menus, and
@@ -21,7 +21,7 @@ notation:
 New questions must match the guide and must not reuse an archetype already in the
 catalog for the same difficulty.
 
-Practice sets live in `apps/api/src/seed/sets/{amc8,amc10,amc12}/set-NN.ts` with id
+Practice sets live in `packages/question-bank/src/sets/{amc8,amc10,amc12}/set-NN.ts` with id
 conventions `sNN-qPP` (AMC 8), `a10sNN-qPP`, `a12sNN-qPP`. Every set is 25 questions,
 positions 1-10 easy / 11-20 medium / 21-25 hard **relative to its contest**. Exam
 types carry official scoring (`EXAM_SCORING` in `@mathprep/core`): AMC 8 is +1/0/0
@@ -34,7 +34,7 @@ Also in this directory:
   (1999-2025), with topic, difficulty bands, and the key insight for each.
 - `amc8_setplans.json` — slot-by-slot blueprints for practice sets 2-26 (topic
   distribution, difficulty ramp, archetype per position). Sets 2-7 are built
-  (`apps/api/src/seed/sets/`); sets 8-26 are planned but not yet generated. To
+  (`packages/question-bank/src/sets/`); sets 8-26 are planned but not yet generated. To
   generate more, follow the batched author/verify pipeline: 3 band-authors per set,
   then 2 independent solvers per question escalating to 4 on disagreement, with a
   repair round for failures. Never merge a question that failed solver consensus.
@@ -72,9 +72,11 @@ Also in this directory:
 ## Verify
 
 ```bash
-pnpm --filter @mathprep/api test      # schema + integrity + API tests
-pnpm test:e2e                         # full portal flow against seeded data
+pnpm --filter @mathprep/question-bank test   # schema + integrity tests
+pnpm test:e2e                                # full portal flow against the bundled bank
 ```
 
-Restart the api dev server (or delete `apps/api/data/dev.db`) after seed changes —
-seeding only runs when the questions table is empty.
+The web portal bundles the bank directly (`@mathprep/question-bank`) — a rebuild
+picks up changes. If running the on-hold api locally, also delete
+`apps/api/data/dev.db`: its SQLite seeding only runs when the questions table is
+empty.
