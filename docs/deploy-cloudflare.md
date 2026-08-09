@@ -51,7 +51,10 @@ Here SPA routing comes from `apps/web/public/_redirects`
 - Node version comes from `.node-version`; pnpm from the root `package.json`
   `packageManager` field. No extra env vars are needed to build.
 - Either flow works — the repo carries both the `_redirects` file (Pages) and
-  `wrangler.jsonc` (Workers), and they don't conflict.
+  `wrangler.jsonc` (Workers). `apps/web/public/.assetsignore` keeps them from
+  conflicting: Workers would otherwise parse the Pages `_redirects` rule and
+  reject the deploy with "Infinite loop detected" (SPA fallback on Workers
+  comes from `not_found_handling`, not `_redirects`).
 
 ## Firebase setup (Google sign-in + user records)
 

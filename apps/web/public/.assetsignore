@@ -1,0 +1,4 @@
+# Workers static assets: don't upload the Pages-only redirects file —
+# SPA fallback comes from wrangler.jsonc (not_found_handling), and Workers
+# rejects the /* /index.html 200 rule as an infinite loop.
+_redirects
