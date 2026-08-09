@@ -9,8 +9,8 @@
  *
  * Firebase console checklist for Google sign-in to work:
  *  1. Authentication → Sign-in method → enable Google.
- *  2. Authentication → Settings → Authorized domains → add the Cloudflare
- *     Pages domain (e.g. mathprep.pages.dev) and any custom domain.
+ *  2. Authentication → Settings → Authorized domains → add the deployed
+ *     Cloudflare domain (…workers.dev or …pages.dev) and any custom domain.
  *  3. Firestore Database → create database (user records land in `users/`).
  */
 export const FIREBASE_CONFIG = {

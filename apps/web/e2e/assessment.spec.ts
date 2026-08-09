@@ -1,6 +1,4 @@
-import { expect, test } from "@playwright/test";
-
-import { signIn } from "./helpers";
+import { expect, signIn, test } from "./helpers";
 
 test("hub lists the mock exam, diagnostic, and topic quizzes", async ({ page }) => {
   await signIn(page, "Blake Rowe", "blake@example.com");

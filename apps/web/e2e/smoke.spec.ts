@@ -1,6 +1,4 @@
-import { expect, test } from "@playwright/test";
-
-import { signIn } from "./helpers";
+import { expect, signIn, test } from "./helpers";
 
 test("the app shows the brand and asks visitors to sign in", async ({ page }) => {
   await page.goto("/");

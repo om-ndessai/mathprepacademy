@@ -5,7 +5,12 @@ import { Navigate, useLocation, useNavigate } from "react-router";
 import { Button } from "@mathprep/ui";
 
 import { useAuth } from "../auth/authContext";
-import { isGoogleSignInAvailable, signInDev, signInWithGoogle } from "../auth/authService";
+import {
+  isDevSignInAvailable,
+  isGoogleSignInAvailable,
+  signInDev,
+  signInWithGoogle,
+} from "../auth/authService";
 
 export function LoginPage() {
   const { status, setUser } = useAuth();
@@ -14,6 +19,7 @@ export function LoginPage() {
   const from = (location.state as { from?: string } | null)?.from ?? "/";
 
   const googleAvailable = isGoogleSignInAvailable();
+  const devAvailable = isDevSignInAvailable();
   const [error, setError] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -65,7 +71,7 @@ export function LoginPage() {
           </p>
         )}
 
-        {googleAvailable ? (
+        {googleAvailable && (
           <Button
             className="google-signin"
             disabled={submitting}
@@ -73,7 +79,8 @@ export function LoginPage() {
           >
             {submitting ? "Signing in…" : "Continue with Google"}
           </Button>
-        ) : (
+        )}
+        {devAvailable && (
           <form onSubmit={(e) => void handleDevSubmit(e)} className="login-form">
             <label>
               Your name
@@ -100,8 +107,7 @@ export function LoginPage() {
               {submitting ? "Signing in…" : "Sign in"}
             </Button>
             <p className="hint">
-              Development sign-in — shown while Firebase credentials are not configured in{" "}
-              <code>src/config/firebase.ts</code>.
+              Development sign-in — no Google account required. Used for local testing and e2e.
             </p>
           </form>
         )}

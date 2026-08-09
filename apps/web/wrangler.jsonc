@@ -1,0 +1,13 @@
+// Cloudflare Workers config for the static portal (the newer "Workers" import
+// flow — Cloudflare's current default, which has no "Build output directory"
+// field). An assets-only Worker: no code, just the built bundle, with SPA
+// fallback replacing the _redirects file that the older Pages flow uses.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mathprep-web",
+  "compatibility_date": "2026-07-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application",
+  },
+}

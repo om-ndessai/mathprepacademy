@@ -1,6 +1,4 @@
-import { expect, test } from "@playwright/test";
-
-import { signIn } from "./helpers";
+import { expect, signIn, test } from "./helpers";
 
 test("visiting signed out redirects to the sign-in page", async ({ page }) => {
   await page.goto("/");

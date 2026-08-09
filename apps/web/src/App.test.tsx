@@ -7,6 +7,7 @@ import * as authService from "./auth/authService";
 
 vi.mock("./auth/authService", () => ({
   isGoogleSignInAvailable: vi.fn(),
+  isDevSignInAvailable: vi.fn(),
   subscribeToAuth: vi.fn(),
   signInWithGoogle: vi.fn(),
   signInDev: vi.fn(),
@@ -30,6 +31,7 @@ function authAs(user: typeof USER | null) {
 beforeEach(() => {
   localStorage.clear();
   vi.mocked(authService.isGoogleSignInAvailable).mockReturnValue(false);
+  vi.mocked(authService.isDevSignInAvailable).mockReturnValue(true);
   vi.mocked(authService.signOutUser).mockResolvedValue(undefined);
   authAs(USER);
 });
@@ -54,6 +56,7 @@ describe("authentication", () => {
   it("offers Google sign-in when Firebase is configured", async () => {
     authAs(null);
     vi.mocked(authService.isGoogleSignInAvailable).mockReturnValue(true);
+    vi.mocked(authService.isDevSignInAvailable).mockReturnValue(false);
     vi.mocked(authService.signInWithGoogle).mockResolvedValue(USER);
     renderAt("/login");
 

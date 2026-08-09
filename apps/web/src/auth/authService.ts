@@ -5,12 +5,34 @@ import { isFirebaseConfigured } from "../config/firebase";
 // One auth surface with two backends: Firebase (Google popup + Firestore
 // user record) when credentials are configured, otherwise a local dev
 // sign-in so the flow stays usable and testable without a Firebase project.
+//
+// The dev backend can also be forced at runtime by setting
+// localStorage["mathprep.devLogin"] = "1" — e2e does this because the Google
+// popup cannot be automated. Client-side gating is fine for this PMF build.
 
 const DEV_USER_KEY = "mathprep.devUser.v1";
+const DEV_LOGIN_FLAG = "mathprep.devLogin";
 
-/** Whether the UI should offer Google (true) or the dev name+email form. */
+function devLoginForced(): boolean {
+  try {
+    return localStorage.getItem(DEV_LOGIN_FLAG) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function devBackendActive(): boolean {
+  return !isFirebaseConfigured() || devLoginForced();
+}
+
+/** Whether the login page should offer the Google popup. */
 export function isGoogleSignInAvailable(): boolean {
-  return isFirebaseConfigured();
+  return !devBackendActive();
+}
+
+/** Whether the login page should offer the dev name+email form. */
+export function isDevSignInAvailable(): boolean {
+  return devBackendActive();
 }
 
 function readDevUser(): AuthUser | null {
@@ -27,7 +49,7 @@ function readDevUser(): AuthUser | null {
  * Returns an unsubscribe function.
  */
 export function subscribeToAuth(callback: (user: AuthUser | null) => void): () => void {
-  if (!isFirebaseConfigured()) {
+  if (devBackendActive()) {
     callback(readDevUser());
     return () => {};
   }
@@ -55,7 +77,7 @@ export async function signInWithGoogle(): Promise<AuthUser> {
 }
 
 export function signInDev(name: string, email: string): Promise<AuthUser> {
-  if (isFirebaseConfigured()) {
+  if (!devBackendActive()) {
     return Promise.reject(new Error("Use Google sign-in"));
   }
   const user: AuthUser = {
@@ -69,7 +91,7 @@ export function signInDev(name: string, email: string): Promise<AuthUser> {
 }
 
 export async function signOutUser(): Promise<void> {
-  if (!isFirebaseConfigured()) {
+  if (devBackendActive()) {
     localStorage.removeItem(DEV_USER_KEY);
     return;
   }
