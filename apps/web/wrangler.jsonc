@@ -4,7 +4,9 @@
 // fallback replacing the _redirects file that the older Pages flow uses.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "mathprep-web",
+  // Must match the Cloudflare Workers project name or CI warns and
+  // auto-opens a rename PR.
+  "name": "mathprepacademy",
   "compatibility_date": "2026-07-01",
   "assets": {
     "directory": "./dist",

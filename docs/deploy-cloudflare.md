@@ -32,7 +32,7 @@ Running through pnpm also puts the working directory at `apps/web`, so the
 `wrangler.jsonc` defines an assets-only Worker: it serves `apps/web/dist`
 with `not_found_handling: "single-page-application"`, so deep links like
 `/assessment` fall back to `index.html`. The site lands on
-`mathprep-web.<account>.workers.dev` (rename via `name` in the config).
+`mathprepacademy.<account>.workers.dev` — the `name` in `wrangler.jsonc` must match the Cloudflare project name or CI warns and auto-opens a rename PR.
 
 ### Classic Pages flow (only if you created a "Pages" project)
 
@@ -64,7 +64,7 @@ Here SPA routing comes from `apps/web/public/_redirects`
    falls back to the dev name+email sign-in (what e2e uses).
 3. **Authentication → Sign-in method**: enable **Google**.
 4. **Authentication → Settings → Authorized domains**: add the deployed
-   domain — `mathprep-web.<account>.workers.dev` (Workers flow) or
+   domain — `mathprepacademy.<account>.workers.dev` (Workers flow) or
    `<project>.pages.dev` (Pages flow) — plus any custom domain.
 5. **Firestore Database**: create a database. Each Google sign-in upserts
    `users/{uid}` with name, email, picture, and last-sign-in time.
