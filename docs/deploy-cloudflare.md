@@ -34,27 +34,16 @@ with `not_found_handling: "single-page-application"`, so deep links like
 `/assessment` fall back to `index.html`. The site lands on
 `mathprepacademy.<account>.workers.dev` — the `name` in `wrangler.jsonc` must match the Cloudflare project name or CI warns and auto-opens a rename PR.
 
-### Classic Pages flow (only if you created a "Pages" project)
-
-| Setting                | Value                               |
-| ---------------------- | ----------------------------------- |
-| Production branch      | `main` (every push deploys)         |
-| Build command          | `pnpm --filter @mathprep/web build` |
-| Build output directory | `apps/web/dist`                     |
-| Root directory         | repo root (leave empty)             |
-
-Here SPA routing comes from `apps/web/public/_redirects`
-(`/* /index.html 200`), which Vite copies into the build output.
-
-### Both flows
+> **No `_redirects` file.** The repo deliberately has none: the Workers flow
+> parses any uploaded `_redirects` and rejects the SPA rule
+> `/* /index.html 200` with "Infinite loop detected" (code 100324) — that rule
+> is Pages-only. On Workers, SPA fallback comes from `not_found_handling` in
+> `wrangler.jsonc`. If you ever switch to a classic Pages project, create
+> `apps/web/public/_redirects` containing `/* /index.html 200` (build command
+> `pnpm --filter @mathprep/web build`, output directory `apps/web/dist`).
 
 - Node version comes from `.node-version`; pnpm from the root `package.json`
   `packageManager` field. No extra env vars are needed to build.
-- Either flow works — the repo carries both the `_redirects` file (Pages) and
-  `wrangler.jsonc` (Workers). `apps/web/public/.assetsignore` keeps them from
-  conflicting: Workers would otherwise parse the Pages `_redirects` rule and
-  reject the deploy with "Infinite loop detected" (SPA fallback on Workers
-  comes from `not_found_handling`, not `_redirects`).
 
 ## Firebase setup (Google sign-in + user records)
 

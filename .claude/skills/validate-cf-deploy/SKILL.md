@@ -21,17 +21,16 @@ pnpm --filter @mathprep/web build
 The build must succeed with no errors. Then assert the output shape:
 
 - `apps/web/dist/index.html` exists.
-- SPA fallback is present for whichever flow is deployed (both should hold):
-  - Workers flow: `apps/web/wrangler.jsonc` has `assets.directory: "./dist"`
-    and `not_found_handling: "single-page-application"`, and
-    `apps/web/dist/.assetsignore` lists `_redirects` — without it Workers
-    parses the Pages redirect rule and rejects the deploy ("Infinite loop
-    detected", code 100324).
-  - Pages flow: `apps/web/dist/_redirects` contains `/* /index.html 200`.
+- `apps/web/wrangler.jsonc` has `assets.directory: "./dist"` and
+  `not_found_handling: "single-page-application"` (that is the SPA fallback —
+  deep links break without it).
+- `apps/web/dist` contains **no `_redirects` file**: the Workers API parses it
+  and rejects the SPA rule `/* /index.html 200` as "Infinite loop detected"
+  (code 100324), failing the whole deploy. It's a Pages-only file.
 - The question bank is bundled: `grep -rl "AMC 8 Mock Exam" apps/web/dist/assets`
   matches at least one JS file.
-- Workers flow only: `pnpm --filter @mathprep/web exec wrangler deploy --dry-run`
-  validates the wrangler config without deploying.
+- `pnpm --filter @mathprep/web exec wrangler deploy --dry-run` validates the
+  wrangler config without deploying.
 
 ## 2. Run e2e against the preview of that build
 
