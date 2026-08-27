@@ -18,8 +18,8 @@
   "devDependencies": {
     "@mathprep/eslint-config": "workspace:*",
     "@mathprep/typescript-config": "workspace:*",
-    "eslint": "^10.7.0",
+    "eslint": "^10.9.0",
     "typescript": "^5.9.3",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.11"
   }
 }
